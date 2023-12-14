@@ -2,13 +2,14 @@ package request
 
 import (
 	"fmt"
+	"github.com/jackc/pgtype"
 	"github.com/NegarMov/shopping-api/internal/model"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
 type BasketCreate struct {
-	Data	string		`json:"data"`
-	State	model.State	`json:"state"`
+	Data	pgtype.JSONB	`json:"data"`
+	State	model.State		`json:"state"`
 }
 
 func (r BasketCreate) Validate() error {
@@ -23,8 +24,8 @@ func (r BasketCreate) Validate() error {
 }
 
 type BasketUpdate struct {
-	Data	string		`json:"data"`
-	State	model.State	`json:"state"`
+	Data	pgtype.JSONB	`json:"data"`
+	State	model.State		`json:"state"`
 }
 
 func (r BasketUpdate) Validate() error {

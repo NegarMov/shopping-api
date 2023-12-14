@@ -5,14 +5,17 @@ import (
 	"github.com/NegarMov/shopping-api/internal/handler"
 	"github.com/NegarMov/shopping-api/internal/store/basket"
 	"github.com/labstack/echo/v4"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func main() {
 	app := echo.New()
 
-	db, err := gorm.Open(sqlite.Open("shop.db"), new(gorm.Config))
+	db, err := gorm.Open(
+		postgres.Open("host=localhost user=postgres password=12345 dbname=shop port=5432"), 
+		new(gorm.Config),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

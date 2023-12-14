@@ -4,16 +4,17 @@ import (
 	"log"
 	"time"
 	"errors"
+	"github.com/jackc/pgtype"
 	"github.com/NegarMov/shopping-api/internal/model"
 	"gorm.io/gorm"
 )
 
 type SQLItem struct {
-	ID      	uint		`gorm:"primaryKey;autoIncrement""`
-	CreatedAt	time.Time	
-	UpdatedAt	time.Time 	
-	Data		string		
-	State		model.State
+	ID      	uint			`gorm:"primaryKey;autoIncrement""`
+	CreatedAt	time.Time		`gorm:"not null"`
+	UpdatedAt	time.Time 		`gorm:"not null"`
+	Data		pgtype.JSONB	`gorm:"type:jsonb;default:'{}'"`
+	State		model.State		`gorm:"not null"`
 }
 
 func (SQLItem) TableName() string {
