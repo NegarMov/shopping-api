@@ -17,4 +17,5 @@ type Basket struct {
 	UpdatedAt	time.Time 		`json:"updated_at"`
 	Data		pgtype.JSONB	`json:"data"`
 	State		State			`json:"state"`
+	UserID		uint			`json:"user_id"`
 }

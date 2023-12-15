@@ -5,5 +5,7 @@
     "db_user": "postgres",
     "db_pass": "12345",
     "db_name": "shop",
-    "db_port": 5432
+    "db_port": 5432,
+    "jwt_secret": "this is a secret key",
+    "token_expiry": 1
 }

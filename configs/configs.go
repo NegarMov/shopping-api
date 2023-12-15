@@ -13,6 +13,8 @@ type Config struct {
     DBPass 		string	`json:"db_pass"`
     DBName 		string	`json:"db_name"`
     DBPort 		uint	`json:"db_port"`
+    JWTSecret 	string	`json:"jwt_secret"`
+    TokenExpiry int	    `json:"token_expiry"`
 }
 
 func LoadConfig() (Config, error) {

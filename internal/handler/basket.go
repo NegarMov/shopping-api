@@ -152,9 +152,9 @@ func (b Basket) Delete(c echo.Context) error {
 }
 
 func (b Basket) Register(g *echo.Group) {
-	g.GET("/basket", b.GetAll)
-	g.POST("/basket", b.Create)
-	g.PATCH("/basket/:id", b.Update)
-	g.GET("/basket/:id", b.Get)
-	g.DELETE("/basket/:id", b.Delete)
+	g.GET("", b.GetAll)
+	g.POST("", b.Create)
+	g.PATCH("/:id", b.Update)
+	g.GET("/:id", b.Get)
+	g.DELETE("/:id", b.Delete)
 }

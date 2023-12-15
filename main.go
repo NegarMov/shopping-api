@@ -4,7 +4,9 @@ import (
 	"log"
 	"github.com/NegarMov/shopping-api/internal/handler"
 	"github.com/NegarMov/shopping-api/internal/store/basket"
+	"github.com/NegarMov/shopping-api/internal/store/user"
 	"github.com/NegarMov/shopping-api/configs"
+	"github.com/NegarMov/shopping-api/internal/auth"
 	"github.com/labstack/echo/v4"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -25,6 +27,8 @@ func main() {
 
 	appConfig := fmt.Sprintf("%s:%d", config.ServerIP, config.ServerPort)
 
+	jwtSecret := config.JWTSecret
+
 	app := echo.New()
 
 	db, err := gorm.Open(
@@ -41,7 +45,18 @@ func main() {
 			Store: b,
 		}
 
-		h.Register(app.Group("/v1"))
+		basketGroup := app.Group("/v1/basket")
+		basketGroup.Use(auth.JwtAuthMiddleware(jwtSecret))
+		h.Register(basketGroup)
+	}
+
+	{
+		u := user.NewSQL(db)
+		h := handler.User{
+			Store: u,
+		}
+
+		h.Register(app.Group("/v1/user"))
 	}
 
 	if err := app.Start(appConfig); err != nil {

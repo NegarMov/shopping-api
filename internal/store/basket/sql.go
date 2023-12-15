@@ -10,11 +10,12 @@ import (
 )
 
 type SQLItem struct {
-	ID      	uint			`gorm:"primaryKey;autoIncrement""`
+	ID      	uint			`gorm:"primaryKey;autoIncrement"`
 	CreatedAt	time.Time		`gorm:"not null"`
 	UpdatedAt	time.Time 		`gorm:"not null"`
 	Data		pgtype.JSONB	`gorm:"type:jsonb;default:'{}'"`
 	State		model.State		`gorm:"not null"`
+	UserID		uint			`gorm:"not null;many2one:basket_user"`
 }
 
 func (SQLItem) TableName() string {
@@ -51,6 +52,7 @@ func (sql SQL) GetAll() ([]model.Basket, error) {
 			UpdatedAt:	item.UpdatedAt,
 			Data:		item.Data,
 			State:		item.State,
+			UserID:		item.UserID,
 		})
 	}
 
@@ -63,6 +65,7 @@ func (sql SQL) Create(b model.Basket) (model.Basket, error) {
 		UpdatedAt:	b.UpdatedAt,
 		Data:		b.Data,
 		State:		b.State,
+		UserID:		b.UserID,
 	}
 
 	if err := sql.DB.Create(&item).Error; err != nil {
@@ -75,6 +78,7 @@ func (sql SQL) Create(b model.Basket) (model.Basket, error) {
 		UpdatedAt:	item.UpdatedAt,
 		Data:		item.Data,
 		State:		item.State,
+		UserID:		item.UserID,
 	}, nil
 }
 
@@ -107,6 +111,7 @@ func (sql SQL) Update(id uint, new_b model.Basket) (model.Basket, error) {
 		UpdatedAt:	b.UpdatedAt,
 		Data:		b.Data,
 		State:		b.State,
+		UserID:		b.UserID,
 	}, nil
 }
 
@@ -127,6 +132,7 @@ func (sql SQL) Get(id uint) (model.Basket, error) {
 		UpdatedAt:	b.UpdatedAt,
 		Data:		b.Data,
 		State:		b.State,
+		UserID:		b.UserID,
 	}, nil
 }
 
@@ -151,5 +157,6 @@ func (sql SQL) Delete(id uint) (model.Basket, error) {
 		UpdatedAt:	b.UpdatedAt,
 		Data:		b.Data,
 		State:		b.State,
+		UserID:		b.UserID,
 	}, nil
 }
