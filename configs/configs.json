@@ -1,0 +1,9 @@
+{
+    "server_ip": "127.0.0.1",
+    "server_port": 80,
+    "db_host": "localhost",
+    "db_user": "postgres",
+    "db_pass": "12345",
+    "db_name": "shop",
+    "db_port": 5432
+}
