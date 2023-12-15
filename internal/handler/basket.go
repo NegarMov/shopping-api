@@ -12,12 +12,26 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func str2uint(s string) (uint, error) {
+	u64, parse_err := strconv.ParseUint(s, 10, 32)
+    if parse_err != nil {
+        log.Println(parse_err)
+		return 0, parse_err
+    }
+    return uint(u64), nil
+}
+
 type Basket struct {
 	Store basket.Basket
 }
 
 func (b Basket) GetAll(c echo.Context) error {
-	baskets, err := b.Store.GetAll()
+	user_id, parse_err := str2uint(c.Get("x-user-id").(string))
+    if parse_err != nil {
+        return echo.ErrInternalServerError
+    }
+
+	baskets, err := b.Store.GetAll(user_id)
 	if err != nil {
 		return echo.ErrInternalServerError
 	}
@@ -26,6 +40,11 @@ func (b Basket) GetAll(c echo.Context) error {
 }
 
 func (b Basket) Create(c echo.Context) error {
+	user_id, parse_err := str2uint(c.Get("x-user-id").(string))
+    if parse_err != nil {
+        return echo.ErrInternalServerError
+    }
+
 	var req request.BasketCreate
 
 	if err := c.Bind(&req); err != nil {
@@ -45,6 +64,7 @@ func (b Basket) Create(c echo.Context) error {
 		UpdatedAt: 	time.Now(),
 		Data: 		req.Data,
 		State:		req.State,
+		UserID: 	user_id,
 	}
 
 	created_b, err := b.Store.Create(new_b)
@@ -59,16 +79,17 @@ func (b Basket) Create(c echo.Context) error {
 }
 
 func (b Basket) Update(c echo.Context) error {
-	var req request.BasketUpdate
-	id_string := c.Param("id")
-
-	u64, parse_err := strconv.ParseUint(id_string, 10, 32)
+	user_id, parse_err := str2uint(c.Get("x-user-id").(string))
     if parse_err != nil {
-        log.Println(parse_err)
-
-		return echo.ErrBadRequest
+        return echo.ErrInternalServerError
     }
-    id := uint(u64)
+
+	var req request.BasketUpdate
+
+	basket_id, parse_err := str2uint(c.Param("id"))
+    if parse_err != nil {
+        return echo.ErrBadRequest
+    }
 
 	if err := c.Bind(&req); err != nil {
 		log.Println(err)
@@ -86,9 +107,10 @@ func (b Basket) Update(c echo.Context) error {
 		UpdatedAt: 	time.Now(),
 		Data: 		req.Data,
 		State:		req.State,
+		UserID: 	user_id,
 	}
 
-	updated_b, err := b.Store.Update(id, new_b)
+	updated_b, err := b.Store.Update(basket_id, new_b)
 
 	if err != nil {
 		if errors.Is(err, basket.ErrBasketCompleted) {
@@ -99,6 +121,10 @@ func (b Basket) Update(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusNotFound, basket.ErrBasketNotFound)
 		}
 
+		if errors.Is(err, basket.ErrAccessDenied) {
+			return echo.NewHTTPError(http.StatusNotFound, basket.ErrAccessDenied)
+		}
+
 		return echo.ErrInternalServerError
 	}
 
@@ -106,20 +132,24 @@ func (b Basket) Update(c echo.Context) error {
 }
 
 func (b Basket) Get(c echo.Context) error {
-	id_string := c.Param("id")
-
-	u64, parse_err := strconv.ParseUint(id_string, 10, 32)
+	user_id, parse_err := str2uint(c.Get("x-user-id").(string))
     if parse_err != nil {
-        log.Println(parse_err)
-
-		return echo.ErrBadRequest
+        return echo.ErrInternalServerError
     }
-    id := uint(u64)
 
-	found_b, err := b.Store.Get(id)
+	basket_id, parse_err := str2uint(c.Param("id"))
+    if parse_err != nil {
+        return echo.ErrBadRequest
+    }
+
+	found_b, err := b.Store.Get(basket_id, user_id)
 	if err != nil {
 		if errors.Is(err, basket.ErrBasketNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, basket.ErrBasketNotFound)
+		}
+
+		if errors.Is(err, basket.ErrAccessDenied) {
+			return echo.NewHTTPError(http.StatusNotFound, basket.ErrAccessDenied)
 		}
 
 		return echo.ErrInternalServerError
@@ -129,20 +159,24 @@ func (b Basket) Get(c echo.Context) error {
 }
 
 func (b Basket) Delete(c echo.Context) error {
-	id_string := c.Param("id")
-
-	u64, parse_err := strconv.ParseUint(id_string, 10, 32)
+	user_id, parse_err := str2uint(c.Get("x-user-id").(string))
     if parse_err != nil {
-        log.Println(parse_err)
-
-		return echo.ErrBadRequest
+        return echo.ErrInternalServerError
     }
-    id := uint(u64)
 
-	deleted_b, err := b.Store.Delete(id)
+	basket_id, parse_err := str2uint(c.Param("id"))
+    if parse_err != nil {
+        return echo.ErrBadRequest
+    }
+
+	deleted_b, err := b.Store.Delete(basket_id, user_id)
 	if err != nil {
 		if errors.Is(err, basket.ErrBasketNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, basket.ErrBasketNotFound)
+		}
+
+		if errors.Is(err, basket.ErrAccessDenied) {
+			return echo.NewHTTPError(http.StatusNotFound, basket.ErrAccessDenied)
 		}
 
 		return echo.ErrInternalServerError

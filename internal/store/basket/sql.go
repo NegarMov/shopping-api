@@ -36,10 +36,10 @@ func NewSQL(db *gorm.DB) Basket {
 	}
 }
 
-func (sql SQL) GetAll() ([]model.Basket, error) {
+func (sql SQL) GetAll(user_id uint) ([]model.Basket, error) {
 	var items []SQLItem
 
-	if err := sql.DB.Model(new(SQLItem)).Find(&items).Error; err != nil {
+	if err := sql.DB.Where("user_id = ?", user_id).Find(&items).Error; err != nil {
 		return nil, err
 	}
 
@@ -93,6 +93,10 @@ func (sql SQL) Update(id uint, new_b model.Basket) (model.Basket, error) {
 		return model.Basket{}, err
 	}
 
+	if new_b.UserID != b.UserID {
+		return model.Basket{}, ErrAccessDenied
+	}
+
 	if b.State == model.Completed {
 		return model.Basket{}, ErrBasketCompleted
 	}
@@ -115,7 +119,7 @@ func (sql SQL) Update(id uint, new_b model.Basket) (model.Basket, error) {
 	}, nil
 }
 
-func (sql SQL) Get(id uint) (model.Basket, error) {
+func (sql SQL) Get(id uint, user_id uint) (model.Basket, error) {
 	var b SQLItem
 
 	if err := sql.DB.First(&b, id).Error; err != nil {
@@ -124,6 +128,10 @@ func (sql SQL) Get(id uint) (model.Basket, error) {
 		}
 
 		return model.Basket{}, err
+	}
+
+	if user_id != b.UserID {
+		return model.Basket{}, ErrAccessDenied
 	}
 
 	return model.Basket{
@@ -136,7 +144,7 @@ func (sql SQL) Get(id uint) (model.Basket, error) {
 	}, nil
 }
 
-func (sql SQL) Delete(id uint) (model.Basket, error) {
+func (sql SQL) Delete(id uint, user_id uint) (model.Basket, error) {
 	var b SQLItem
 
 	if err := sql.DB.First(&b, id).Error; err != nil {
@@ -149,6 +157,10 @@ func (sql SQL) Delete(id uint) (model.Basket, error) {
 
 	if err := sql.DB.Delete(&b).Error; err != nil {
 		return model.Basket{}, err
+	}
+
+	if user_id != b.UserID {
+		return model.Basket{}, ErrAccessDenied
 	}
 
 	return model.Basket{
